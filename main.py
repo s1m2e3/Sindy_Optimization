@@ -6,7 +6,7 @@ import numpy as np
 
 def main():
 
-    states = np.random.rand(1000,3)
+    states = np.random.rand(10,3)
     cols = 5 
     comb = True
     sys = system_creator(cols,states,comb)

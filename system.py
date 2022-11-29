@@ -17,8 +17,7 @@ class system_creator:
        
        #create library
        self.lib = self.create()
-       print(list(self.lib))
-
+       
     def create(self):
         
         '''
@@ -53,7 +52,10 @@ class system_creator:
         dictionary = self.pol(exp,degree,variables,states)
         
         mat_pol = pd.DataFrame.from_dict(dictionary)
+        print(mat_pol.columns)
         mat_cos = np.cos(mat_pol)
+        mat_cos.columns = str("cos(")+mat_cos.columns+str(")") 
+        print(mat_cos.columns)
         mat_tan = np.tan(mat_pol)
         mat_sin = np.sin(mat_pol)
         mat_exp = np.exp(mat_pol)
@@ -63,7 +65,14 @@ class system_creator:
         combinations = [(elems[i],elems[j]) for i in range(len(elems)) for j in range(len(elems))]
         combinations = combinations[1:]
         base_dict = self.compose_dict(base_dict,combinations,degree,compositions)
-        return base_dict
+        #print(list(base_dict))
+        df=pd.DataFrame(np.ones((states.shape[0],1)))
+        df.columns = ["constant"]
+        for shape in base_dict:
+            df = pd.concat((df,base_dict[shape]),axis=1)
+        #print(df.columns)
+        #print(df.shape)
+        return df
 
 
     def pol(self,exp,degree,variables,states):
@@ -85,6 +94,7 @@ class system_creator:
         for pair in combinations:
             first = pair[0]
             second = pair[1]
+            
             if first == "pol":
                 '''
                 string = "x:"+str(base_dict[second].shape[1])
