@@ -7,15 +7,12 @@ import pandas as pd
 
 class system_creator:
 
-    def __init__(self,cols,states,comp=False,tuning=False,n_degree=3) -> None:
+    def __init__(self,states,comp=False,tuning=False,n_degree=3) -> None:
        
-       self.cols = cols
        self.states = states
        self.comp = comp
        self.tuning = tuning
        self.n_degree = n_degree
-       
-       #create library
        self.lib = self.create()
        
     def create(self):
@@ -62,16 +59,14 @@ class system_creator:
         mat_log = np.log(mat_pol)
         elems = ['pol','sin','cos','tan','exp','log']
         base_dict = dict(zip(elems,[mat_pol,mat_sin,mat_cos,mat_tan,mat_exp,mat_log]))
-        combinations = [(elems[i],elems[j]) for i in range(len(elems)) for j in range(len(elems))]
-        combinations = combinations[1:]
-        base_dict = self.compose_dict(base_dict,combinations,degree,compositions)
-        #print(list(base_dict))
+        if self.comp:
+            combinations = [(elems[i],elems[j]) for i in range(len(elems)) for j in range(len(elems))]
+            combinations = combinations[1:]
+            base_dict = self.compose_dict(base_dict,combinations,degree,compositions)
         df=pd.DataFrame(np.ones((states.shape[0],1)))
         df.columns = ["constant"]
         for shape in base_dict:
             df = pd.concat((df,base_dict[shape]),axis=1)
-        #print(df.columns)
-        #print(df.shape)
         return df
 
 
