@@ -86,7 +86,9 @@ class system_creator:
         return dictionary
     
     def compose_dict(self,base_dict,combinations,degree,compositions):
+        
         for pair in combinations:
+            
             first = pair[0]
             second = pair[1]
             
