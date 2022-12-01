@@ -49,14 +49,30 @@ class system_creator:
         dictionary = self.pol(exp,degree,variables,states)
         
         mat_pol = pd.DataFrame.from_dict(dictionary)
-        print(mat_pol.columns)
         mat_cos = np.cos(mat_pol)
-        mat_cos.columns = str("cos(")+mat_cos.columns+str(")") 
-        print(mat_cos.columns)
+        string_1 = "cos("
+        string_2 = ")"
+        mat_cos.columns = [string_1+str(col)+string_2 for col in mat_cos.columns] 
         mat_tan = np.tan(mat_pol)
+        string_1 = "tan("
+        string_2 = ")"
+        mat_tan.columns = [string_1+str(col)+string_2 for col in mat_tan.columns] 
+        
         mat_sin = np.sin(mat_pol)
+        string_1 = "sin("
+        string_2 = ")"
+        mat_sin.columns = [string_1+str(col)+string_2 for col in mat_sin.columns] 
+        
         mat_exp = np.exp(mat_pol)
+        string_1 = "exp("
+        string_2 = ")"
+        mat_exp.columns = [string_1+str(col)+string_2 for col in mat_exp.columns] 
+        
         mat_log = np.log(mat_pol)
+        string_1 = "log("
+        string_2 = ")"
+        mat_log.columns = [string_1+str(col)+string_2 for col in mat_log.columns] 
+        
         elems = ['pol','sin','cos','tan','exp','log']
         base_dict = dict(zip(elems,[mat_pol,mat_sin,mat_cos,mat_tan,mat_exp,mat_log]))
         if self.comp:
