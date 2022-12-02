@@ -11,7 +11,7 @@ class PGM_solver:
       self.b = b
    
    def backtracking(self,x,grad_f,g_prox,lip,rho,lamb): 
-      gamma = 1/lip
+      gamma = 10/lip
       A=self.system.lib
       b=self.b
       while np.linalg.norm(grad_f(A,g_prox(x-gamma*grad_f(A,x,b),lamb,gamma),b)-grad_f(A,x,b))>1/(2*gamma)*np.linalg.norm(g_prox(x-gamma*grad_f(A,x,b),lamb,gamma)-x):
@@ -27,15 +27,15 @@ class PGM_solver:
       A2 = 2*np.matmul(A.T,A)/len(x)
       A2 = np.nan_to_num(A2,nan=0,posinf=0,neginf=0)
       lip=np.real((np.max(np.linalg.eig(A2)[0])))
-      gamma = 1/lip
+      gamma = 10/lip
       num=0
       obj_function=[]
       #for k in range(int(maxiter)):
-      while(1/gamma*np.linalg.norm(g_prox(x-gamma*grad_f(A,x,b),lamb,gamma)-x))> epsilon:
+      while(1/gamma*np.linalg.norm(g_prox(x-gamma*grad_f(A,x,b),lamb,gamma)-x)) > epsilon:
          gamma = self.backtracking(x,grad_f,g_prox,lip,rho,lamb)
          x = g_prox(x-gamma*grad_f(A,x,b),lamb,gamma)
          obj_function.append(f(A,x,b))
-         print(x)
+      print(x)
       print("final_loss",f(A,x,b))
       print("if x is 0 ",np.sum(np.power(b,2))/len(x))
       print("least squares solution ",f(A,np.linalg.lstsq(A,b,rcond=None)[0],b)) 

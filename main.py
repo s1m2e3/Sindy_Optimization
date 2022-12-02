@@ -43,9 +43,9 @@ def main():
 
     for points in n_points:
         
-        sigma = np.random.normal(loc = 0,scale = 10)
-        rho = np.random.normal(loc = 0,scale = 10)
-        beta = np.random.normal(loc = 0,scale = 10)
+        sigma = np.random.normal(loc = 0,scale = 5)
+        rho = np.random.normal(loc = 0,scale = 5)
+        beta = np.random.normal(loc = 0,scale = 5)
         states,diff = lorentz_system(sigma,rho,beta,points)
         states = normalize(states)
         diff = np.nan_to_num(diff,nan=0,posinf=0,neginf=0)
@@ -62,23 +62,26 @@ def main():
         sys = system_creator(states,True)
         sys.lib = np.nan_to_num(sys.lib,nan=0,posinf=0,neginf=0)
         initial_guess = np.zeros((sys.lib.shape[1],states.shape[1]))
-        rho = 0.5
+        rho = 0.9
         lamb = 1e-1
         maxiter = 1e4
         epsilon = 1e-4
         solution ={}
         obj_func = {}
+
         for col in range(initial_guess.shape[1]):
+
             pgm = PGM_solver(sys,initial_guess[:,col],diff[:,col])
-            solution[col] , obj_func[col]=pgm.PGMD(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
-            plt.figure()
-            sns.set_theme()
-            plt.plot(obj_func[col]-obj_func[col][-1])
+            solution[col] ,obj_func[col]=pgm.PGMD(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
+            plt.figure(figsize=(20,10))
+            sns.set()
+            plt.plot(obj_func[col])
             plt.ylabel('objective function reduction')
             plt.xlabel('number of iterations')
             plt.title("equation_pred_"+str(col))
             plt.savefig("equation_pred_"+str(col)+".png")
             plt.close()
+
 if __name__=="__main__":
     main()
 
