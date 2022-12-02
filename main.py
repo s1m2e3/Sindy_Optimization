@@ -7,18 +7,18 @@ from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import normalize
 import seaborn as sns
+import time
 
 def f(A,x,b):
     return np.sum(np.power((A@x-b),2))/len(x)
 def grad_f(A,x,b):
-    vec= 2*(A@x-b)/len(x)
-    vec = vec.reshape((len(vec),1))
-    comp1 = np.sum(np.multiply(vec,A),axis=0) 
+    #vec = 2*(A@x-b)/len(x)
+    #vec = vec.reshape((len(vec),1))
+    #comp1 = np.sum(np.multiply(vec,A),axis=0) 
     comp = (np.matmul(A.T,np.matmul(A,x))+np.matmul(np.matmul(x.T,A.T),A)-np.matmul(A.T,b)-np.matmul(b.T,A))/len(x)
-    return comp1
+    return comp
 def g_prox(x,lamb,gamma):
-    prev = np.abs(x)-gamma*lamb*np.ones(x.shape)
-    return  np.maximum(prev,np.zeros(x.shape))*np.sign(x)
+    return  np.maximum(np.abs(x)-gamma*lamb*np.ones(x.shape),np.zeros(x.shape))*np.sign(x)
 
 def lorentz_system(sigma,rho,beta,n_points):
     
@@ -62,17 +62,19 @@ def main():
         sys = system_creator(states,True)
         sys.lib = np.nan_to_num(sys.lib,nan=0,posinf=0,neginf=0)
         initial_guess = np.zeros((sys.lib.shape[1],states.shape[1]))
-        rho = 0.9
+        rho = 0.1
         lamb = 1e-1
         maxiter = 1e4
         epsilon = 1e-4
         solution ={}
         obj_func = {}
-
+        time_per_step = {}
+        active_columns = {}
+        opt_gap = {}
         for col in range(initial_guess.shape[1]):
 
             pgm = PGM_solver(sys,initial_guess[:,col],diff[:,col])
-            solution[col] ,obj_func[col]=pgm.PGMD(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
+            solution[col] ,obj_func[col],time_per_step[col],active_columns[col],opt_gap[col]=pgm.PGMD(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
             plt.figure(figsize=(20,10))
             sns.set()
             plt.plot(obj_func[col])
