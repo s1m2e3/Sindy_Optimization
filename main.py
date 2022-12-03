@@ -43,41 +43,45 @@ def main():
 
     for points in n_points:
         
-        sigma = np.random.normal(loc = 0,scale = 5)
-        rho = np.random.normal(loc = 0,scale = 5)
-        beta = np.random.normal(loc = 0,scale = 5)
+        #create lorentz system prediction
+        sigma = np.random.normal(loc = 0,scale = 10)
+        rho = np.random.normal(loc = 0,scale = 10)
+        beta = np.random.normal(loc = 0,scale = 10)
         states,diff = lorentz_system(sigma,rho,beta,points)
         states = normalize(states)
         diff = np.nan_to_num(diff,nan=0,posinf=0,neginf=0)
         diff = normalize(diff)
         
-        '''
-        plt.figure()
-        ax = plt.axes(projection='3d')
-        # Data for a three-dimensional scattered
-        ax.scatter3D(diff[:,0],diff[:,1], diff[:,2],c=diff[:,0]*diff[:,1],cmap="summer")
-        plt.savefig("orig_lorentz_"+str(points)+".png")
-        '''
-
+        
+        #create library
         sys = system_creator(states,True)
+        labels = sys.lib.columns.to_list()
         sys.lib = np.nan_to_num(sys.lib,nan=0,posinf=0,neginf=0)
+        
+        #set parameters
         initial_guess = np.zeros((sys.lib.shape[1],states.shape[1]))
-        rho = 0.1
-        lamb = 1e-1
+        rho = 0.5
+        lamb = 1e-5
         maxiter = 1e4
         epsilon = 1e-4
+
+        #create storage
         solution ={}
         obj_func = {}
         time_per_step = {}
         active_columns = {}
         opt_gap = {}
-        for col in range(initial_guess.shape[1]):
 
+        sns.set()
+        for col in range(1):
             pgm = PGM_solver(sys,initial_guess[:,col],diff[:,col])
-            solution[col] ,obj_func[col],time_per_step[col],active_columns[col],opt_gap[col]=pgm.PGMD(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
+            solution[col] ,obj_func[col],time_per_step[col],active_columns[col],opt_gap[col]=pgm.PGMD_FISTA(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
+            sparse_index = (np.nonzero(solution[col]))[0]
+            for index in sparse_index:
+                print("sparse representation for equation %d found by PGMB:%s " %(col,labels[index]))
+                
             plt.figure(figsize=(20,10))
-            sns.set()
-            plt.plot(obj_func[col])
+            plt.semilogy(obj_func[col])
             plt.ylabel('objective function reduction')
             plt.xlabel('number of iterations')
             plt.title("equation_pred_"+str(col))

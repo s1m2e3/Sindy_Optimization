@@ -29,12 +29,14 @@ class PGM_solver:
       A2 = 2*np.matmul(A.T,A)/len(x)
       A2 = np.nan_to_num(A2,nan=0,posinf=0,neginf=0)
       lip=np.real((np.max(np.linalg.eig(A2)[0])))
-      gamma = 2/lip
+      gamma = 1
       obj_function=[]
       time_per_step = []
       active_columns = []
       optimality_gap = []
-      for k in range(int(10)):
+      
+      #for k in range(maxiter):
+      while(1/gamma*np.linalg.norm(g_prox(x-gamma*grad_f(A,x,b),lamb,gamma)-x)) > epsilon:
          current= time.time()
          gamma = self.backtracking(x,grad_f,g_prox,lip,rho,lamb)
          x = g_prox(x-gamma*grad_f(A,x,b),lamb,gamma)
@@ -43,9 +45,7 @@ class PGM_solver:
          time_per_step.append(final-current)
          active_columns.append(np.nonzero(x))
          optimality_gap.append(1/gamma*np.linalg.norm(g_prox(x-gamma*grad_f(A,x,b),lamb,gamma)-x)-epsilon)
-      print(x)   
-      print("finished")
-
+         print(x)
       return x,obj_function,time_per_step,active_columns,optimality_gap
    
 
@@ -56,8 +56,9 @@ class PGM_solver:
       A2 = 2*np.matmul(A.T,A)/len(y)
       A2 = np.nan_to_num(A2,nan=0,posinf=0,neginf=0)
       lip=np.real((np.max(np.linalg.eig(A2)[0])))
-      gamma = 2/lip
+      gamma = 1
       obj_function=[]
+      
       xk_1 = y
       tk_1 = 1
       time_per_step = []
@@ -77,7 +78,7 @@ class PGM_solver:
          time_per_step.append(final-current)
          active_columns.append(np.nonzero(xk))
          optimality_gap.append(1/gamma*np.linalg.norm(g_prox(xk-gamma*grad_f(A,xk,b),lamb,gamma)-xk)-epsilon)
-         
-      print(xk)
-      print("finished")
+         print(xk)
+         #print(np.round(f(A,xk,b),3),np.nonzero(xk),np.round(1/gamma*np.linalg.norm(g_prox(y-gamma*grad_f(A,y,b),lamb,gamma)-y),3))
+
       return xk,obj_function,time_per_step,active_columns,optimality_gap
