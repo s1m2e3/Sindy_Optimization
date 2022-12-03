@@ -39,7 +39,7 @@ def lorentz_system(sigma,rho,beta,n_points):
     
 def main():
 
-    n_points =[1000]
+    n_points =[100,500,1000]
 
     for points in n_points:
         
@@ -61,32 +61,58 @@ def main():
         #set parameters
         initial_guess = np.zeros((sys.lib.shape[1],states.shape[1]))
         rho = 0.5
-        lamb = 1e-5
+        lamb = 1e-3
         maxiter = 1e4
         epsilon = 1e-4
 
         #create storage
-        solution ={}
-        obj_func = {}
-        time_per_step = {}
-        active_columns = {}
-        opt_gap = {}
-
+        solution ={"reg":{},"fista":{}}
+        obj_func = {"reg":{},"fista":{}}
+        time_per_step = {"reg":{},"fista":{}}
+        active_columns = {"reg":{},"fista":{}}
+        opt_gap = {"reg":{},"fista":{}}
+        
         sns.set()
-        for col in range(1):
+        for col in range(3):
             pgm = PGM_solver(sys,initial_guess[:,col],diff[:,col])
-            solution[col] ,obj_func[col],time_per_step[col],active_columns[col],opt_gap[col]=pgm.PGMD_FISTA(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
-            sparse_index = (np.nonzero(solution[col]))[0]
+            solution['fista'][col] ,obj_func['fista'][col],time_per_step['fista'][col],active_columns['fista'][col],opt_gap['fista'][col]=pgm.PGMD(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
+            sparse_index = (np.nonzero(solution['fista'][col]))[0]
+            for index in sparse_index:
+                print("sparse representation for equation %d found by PGMB FISTA:%s " %(col,labels[index]))
+            print("average time per step by PGMD FISTA",np.mean(time_per_step["fista"][col]))
+            solution['reg'][col] ,obj_func['reg'][col],time_per_step['reg'][col],active_columns['reg'][col],opt_gap['reg'][col]=pgm.PGMD_FISTA(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
+            sparse_index = (np.nonzero(solution['reg'][col]))[0]
             for index in sparse_index:
                 print("sparse representation for equation %d found by PGMB:%s " %(col,labels[index]))
-                
+            print("average time per step by PGMD",np.mean(time_per_step["fista"][col]))
+
             plt.figure(figsize=(20,10))
-            plt.semilogy(obj_func[col])
+            plt.semilogy(obj_func['reg'][col])
+            plt.semilogy(obj_func['fista'][col])
             plt.ylabel('objective function reduction')
             plt.xlabel('number of iterations')
             plt.title("equation_pred_"+str(col))
-            plt.savefig("equation_pred_"+str(col)+".png")
+            plt.legend(["regular PGMD","FISTA PGMD"])
+            plt.savefig("equation_pred_"+str(col)+str(points)+".png")
             plt.close()
+
+            plt.figure(figsize=(20,10))
+            active_columns['reg'][col]=[len(i) for i in active_columns['reg'][col]]
+            active_columns['reg'][col],bins=np.unique(active_columns['reg'][col],return_counts=True)
+            plt.bar(x=bins,height=active_columns['reg'][col])
+            active_columns['fista'][col]=[len(i) for i in active_columns['fista'][col]]
+            active_columns['fista'][col],bins=np.unique(active_columns['fista'][col],return_counts=True)
+            plt.bar(x=bins,height=active_columns['fista'][col])
+            
+            plt.ylabel('number of active terms')
+            plt.xlabel('number of iterations')
+            plt.title("equation_pred_"+str(col)+"active_terms")
+            plt.legend(["regular PGMD","FISTA PGMD"])
+            plt.savefig("active_terms_equation_pred_"+str(col)+str(points)+".png")
+            plt.close()
+
+            
+
 
 if __name__=="__main__":
     main()
