@@ -7,7 +7,7 @@ import pandas as pd
 
 class system_creator:
 
-    def __init__(self,states,comp=False,tuning=False,n_degree=3) -> None:
+    def __init__(self,states,comp=False,tuning=False,n_degree=2) -> None:
        
        self.states = states
        self.comp = comp
@@ -73,17 +73,17 @@ class system_creator:
         # string_2 = ")"
         # mat_log.columns = [string_1+str(col)+string_2 for col in mat_log.columns] 
         
-        #elems = ['pol']
-        #base_dict = dict(zip(elems,[mat_pol]))
+        elems = ['pol']
+        base_dict = dict(zip(elems,[mat_pol]))
         #df= pd.DataFrame.from_dict(base_dict,orient='columns')
-        #if self.comp:
+        # if self.comp:
         #    combinations = [(elems[i],elems[j]) for i in range(len(elems)) for j in range(len(elems))]
         #    combinations = combinations[1:]
         #    base_dict = self.compose_dict(base_dict,combinations,degree,compositions)
-        #df=pd.DataFrame(np.ones((states.shape[0],1)))
-        #df.columns = ["constant"]
-        #for shape in base_dict:
-        #    df = pd.concat((df,base_dict[shape]),axis=1)
+        df=pd.DataFrame(np.ones((states.shape[0],1)))
+        df.columns = ["constant"]
+        for shape in base_dict:
+            df = pd.concat((df,base_dict[shape]),axis=1)
         return mat_pol
 
 

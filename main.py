@@ -22,9 +22,9 @@ def g_prox(x,lamb,gamma):
 
 def lorentz_system(sigma,rho,beta,n_points):
     
-    low = -10
-    high = 10
-    states = np.random.uniform(low,high,size = (n_points,3))
+    #low = -10
+    #high = 10
+    states =np.random.normal(loc = 0,scale = 10,size = (n_points,3)) 
     diff = states
     diff[:,0] = sigma*(states[:,1]-states[:,0])
     diff[:,1] = states[:,0]*(rho-states[:,2])-states[:,1]
@@ -39,7 +39,7 @@ def lorentz_system(sigma,rho,beta,n_points):
     
 def main():
 
-    n_points =[100,500,1000]
+    n_points =[1000,5000,10000]
 
     for points in n_points:
         
@@ -48,21 +48,21 @@ def main():
         rho = np.random.normal(loc = 0,scale = 10)
         beta = np.random.normal(loc = 0,scale = 10)
         states,diff = lorentz_system(sigma,rho,beta,points)
-        states = normalize(states)
+        #states,states_norm = normalize(states,return_norm=True)
         diff = np.nan_to_num(diff,nan=0,posinf=0,neginf=0)
-        diff = normalize(diff)
+        diff,diff_norm = normalize(diff,return_norm=True)
         
         
         #create library
         sys = system_creator(states,True)
         labels = sys.lib.columns.to_list()
-        sys.lib = np.nan_to_num(sys.lib,nan=0,posinf=0,neginf=0)
+        sys.lib,lib_norm = normalize(sys.lib,return_norm=True)
         
         #set parameters
         initial_guess = np.zeros((sys.lib.shape[1],states.shape[1]))
         rho = 0.5
-        lamb = 1e-3
-        maxiter = 1e4
+        lamb = 1e-4
+        maxiter = 1e5
         epsilon = 1e-4
 
         #create storage
@@ -79,13 +79,24 @@ def main():
             sparse_index = (np.nonzero(solution['fista'][col]))[0]
             for index in sparse_index:
                 print("sparse representation for equation %d found by PGMB FISTA:%s " %(col,labels[index]))
+            plt.figure()
+            plt.plot(np.multiply(sys.lib@solution['fista'][col],lib_norm[col]),'o')
+            plt.plot(np.multiply(diff[:,col],diff_norm[col]),'x')
+            plt.legend(["prediction","real"])
+            plt.show()
             print("average time per step by PGMD FISTA",np.mean(time_per_step["fista"][col]))
+            print("MSE found by PGMB FISTA:",obj_func['fista'][col][-1])
             solution['reg'][col] ,obj_func['reg'][col],time_per_step['reg'][col],active_columns['reg'][col],opt_gap['reg'][col]=pgm.PGMD_FISTA(f,grad_f,g_prox,lamb,rho,maxiter,epsilon)
             sparse_index = (np.nonzero(solution['reg'][col]))[0]
             for index in sparse_index:
                 print("sparse representation for equation %d found by PGMB:%s " %(col,labels[index]))
-            print("average time per step by PGMD",np.mean(time_per_step["fista"][col]))
-
+            print("average time per step by PGMD",np.mean(time_per_step["reg"][col]))
+            print("MSE found by PGMB:",obj_func['reg'][col][-1])
+            plt.figure()
+            plt.plot(sys.lib@solution['reg'][col],'o')
+            plt.plot(diff[:,col],'x')
+            plt.legend(["prediction","real"])
+            plt.show()
             plt.figure(figsize=(20,10))
             plt.semilogy(obj_func['reg'][col])
             plt.semilogy(obj_func['fista'][col])

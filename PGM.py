@@ -45,7 +45,7 @@ class PGM_solver:
          time_per_step.append(final-current)
          active_columns.append(np.nonzero(x))
          optimality_gap.append(1/gamma*np.linalg.norm(g_prox(x-gamma*grad_f(A,x,b),lamb,gamma)-x)-epsilon)
-         
+         print(optimality_gap[-1])   
       return x,obj_function,time_per_step,active_columns,optimality_gap
    
 
@@ -78,7 +78,7 @@ class PGM_solver:
          time_per_step.append(final-current)
          active_columns.append(np.nonzero(xk))
          optimality_gap.append(1/gamma*np.linalg.norm(g_prox(xk-gamma*grad_f(A,xk,b),lamb,gamma)-xk)-epsilon)
-         
+         #print(optimality_gap[-1])
          #print(np.round(f(A,xk,b),3),np.nonzero(xk),np.round(1/gamma*np.linalg.norm(g_prox(y-gamma*grad_f(A,y,b),lamb,gamma)-y),3))
 
       return xk,obj_function,time_per_step,active_columns,optimality_gap
