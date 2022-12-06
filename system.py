@@ -47,7 +47,7 @@ class system_creator:
         for var in variables[1:]:
             exp = var+exp
         dictionary = self.pol(exp,degree,variables,states)
-        
+        print("finished polynomial")
         mat_pol = pd.DataFrame.from_dict(dictionary)
         # mat_cos = np.cos(mat_pol)
         # string_1 = "cos("
@@ -99,7 +99,9 @@ class system_creator:
                 for j in range(len(states)):
                     replace = [(symbols_list[i],states[j][indexes[i]]) for i in range(len(symbols_list))]
                     vector[j] = term.subs(replace)
+                    
                 dictionary[term] = vector
+            
         return dictionary
     
     def compose_dict(self,base_dict,combinations,degree,compositions):
